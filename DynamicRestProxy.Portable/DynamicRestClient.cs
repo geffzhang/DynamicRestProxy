@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Net;
@@ -12,9 +14,9 @@ namespace DynamicRestProxy.PortableHttpClient
     /// </summary>
     public class DynamicRestClient : RestProxy
     {
-        private string _baseUrl;
-        private DynamicRestClientDefaults _defaults;
-        private Func<HttpRequestMessage, Task> _configureRequest;
+        private readonly string _baseUrl;
+        private readonly DynamicRestClientDefaults _defaults;
+        private readonly Func<HttpRequestMessage, CancellationToken, Task> _configureRequest;
 
         /// <summary>
         /// ctor
@@ -22,16 +24,16 @@ namespace DynamicRestProxy.PortableHttpClient
         /// <param name="baseUrl">The root url for all requests</param>
         /// <param name="defaults">Default values to add to all requests</param>
         /// <param name="configure">A callback function that will be called just before any request is sent</param>
-        public DynamicRestClient(string baseUrl, DynamicRestClientDefaults defaults = null, Func<HttpRequestMessage, Task> configure = null)
+        public DynamicRestClient(string baseUrl, DynamicRestClientDefaults defaults = null, Func<HttpRequestMessage, CancellationToken, Task> configure = null)
             : this(baseUrl, null, "", defaults, configure)
         {
         }
 
-        internal DynamicRestClient(string baseUrl, RestProxy parent, string name, DynamicRestClientDefaults defaults, Func<HttpRequestMessage, Task> configure)
+        internal DynamicRestClient(string baseUrl, RestProxy parent, string name, DynamicRestClientDefaults defaults, Func<HttpRequestMessage, CancellationToken, Task> configure)
             : base(parent, name)
         {
             _baseUrl = baseUrl;
-            _defaults = defaults ?? new DynamicRestClientDefaults(); ;
+            _defaults = defaults ?? new DynamicRestClientDefaults();
             _configureRequest = configure;
         }
 
@@ -57,17 +59,21 @@ namespace DynamicRestProxy.PortableHttpClient
         protected async override Task<dynamic> CreateVerbAsyncTask(string verb, IEnumerable<object> unnamedArgs, IDictionary<string, object> namedArgs)
         {
             var builder = new RequestBuilder(this, _defaults);
-            using (var request = builder.CreateRequest(verb, unnamedArgs, namedArgs))
+
+            // filter any CancellationTokens out of the unnamed args as those are not intended as content
+            using (var request = builder.CreateRequest(verb, unnamedArgs.Where(arg => !(arg is CancellationToken)), namedArgs))
             {
+                var token = unnamedArgs.OfType<CancellationToken>().FirstOrDefault(CancellationToken.None);
+
                 // give the user code a chance to setup any other request details
                 // this is especially useful for setting oauth tokens when they have different lifetimes than the rest client
                 if (_configureRequest != null)
                 {
-                    await _configureRequest(request);
+                    await _configureRequest(request, token);
                 }
 
                 using (var client = CreateClient())
-                using (var response = await client.SendAsync(request))
+                using (var response = await client.SendAsync(request, token))
                 {
                     response.EnsureSuccessStatusCode();
 
@@ -92,9 +98,21 @@ namespace DynamicRestProxy.PortableHttpClient
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/json"));
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/x-json"));
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/javascript"));
+            
+            if (handler.SupportsTransferEncodingChunked())
+            {
+                client.DefaultRequestHeaders.TransferEncodingChunked = true;
+            }
 
             if (_defaults != null)
             {
+                ProductInfoHeaderValue productHeader = null;
+                if (!string.IsNullOrEmpty(_defaults.UserAgent) && ProductInfoHeaderValue.TryParse(_defaults.UserAgent, out productHeader))
+                {
+                    client.DefaultRequestHeaders.UserAgent.Clear();
+                    client.DefaultRequestHeaders.UserAgent.Add(productHeader);
+                }
+                
                 foreach (var kvp in _defaults.DefaultHeaders)
                 {
                     client.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);

@@ -7,6 +7,11 @@ namespace DynamicRestProxy.PortableHttpClient
 {
     static class Extensions
     {
+        public static T FirstOrDefault<T>(this IEnumerable<T> source, T def)
+        {
+            return source.Any() ? source.First() : def;
+        }
+
         public static string AsQueryString(this IEnumerable<KeyValuePair<string, object>> parameters, string prepend = "?")
         {
             if (!parameters.Any())
@@ -15,7 +20,7 @@ namespace DynamicRestProxy.PortableHttpClient
             var builder = new StringBuilder(prepend);
 
             var separator = "";
-            foreach(var kvp in parameters.Where(kvp => kvp.Value != null))
+            foreach (var kvp in parameters.Where(kvp => kvp.Value != null))
             {
                 if (kvp.Value is IDictionary<string, object>)
                 {

@@ -9,8 +9,18 @@ namespace DynamicRestProxy.PortableHttpClient
 {
     class RequestBuilder
     {
-        private RestProxy _proxy;
-        private DynamicRestClientDefaults _defaults;
+        private readonly RestProxy _proxy;
+        private readonly DynamicRestClientDefaults _defaults;
+
+        private static readonly IDictionary<string, HttpMethod> _methods = new Dictionary<string, HttpMethod>();
+
+        static RequestBuilder()
+        {
+            foreach (var verb in BinderExtensions._verbs)
+            {
+                _methods.Add(verb, new HttpMethod(verb.ToUpperInvariant()));
+            }
+        }
 
         public RequestBuilder(RestProxy proxy, DynamicRestClientDefaults defaults)
         {
@@ -21,19 +31,19 @@ namespace DynamicRestProxy.PortableHttpClient
 
         public HttpRequestMessage CreateRequest(string verb, IEnumerable<object> unnamedArgs, IDictionary<string, object> namedArgs)
         {
-            var method = GetMethod(verb);
+            // the way the base class and this class's static contructor use BinderExtensions._verbs should prevent an unkown verb from reaching here
+            Debug.Assert(_methods.ContainsKey(verb), "unrecognized verb. check the BinderExtensions _verbs array");
 
             var allNamedArgs = namedArgs.Concat(_defaults.DefaultParameters);
 
-            var request = new HttpRequestMessage();
-            request.Method = method;
-            request.RequestUri = MakeUri(method, allNamedArgs);
-
-            using (var handler = new HttpClientHandler())
+            var method = _methods[verb];
+            var request = new HttpRequestMessage()
             {
-                request.Headers.TransferEncodingChunked = handler.SupportsTransferEncodingChunked();
-            }
+                Method = method,
+                RequestUri = MakeUri(method, allNamedArgs)
+            };
 
+            // filter out a cancellationtoken if passed
             var content = CreateContent(method, unnamedArgs, allNamedArgs);
             if (content != null)
             {
@@ -80,28 +90,6 @@ namespace DynamicRestProxy.PortableHttpClient
             }
 
             return null;
-        }
-
-        private static HttpMethod GetMethod(string verb)
-        {
-            if (verb == "get")
-            {
-                return HttpMethod.Get;
-            }
-            if (verb == "post")
-            {
-                return HttpMethod.Post;
-            }
-            if (verb == "delete")
-            {
-                return HttpMethod.Delete;
-            }
-            if (verb == "put")
-            {
-                return HttpMethod.Put;
-            }
-
-            throw new InvalidOperationException("Unknown http verb:" + verb);
         }
     }
 }

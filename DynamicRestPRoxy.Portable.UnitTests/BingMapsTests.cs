@@ -44,7 +44,7 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
                 dynamic proxy = new HttpClientProxy(client);
                 var result = await proxy.Locations.get(postalCode: "55116", countryRegion: "US", key: key);
 
-                Assert.AreEqual((int)result.statusCode, 200);
+                Assert.AreEqual(200, (int)result.statusCode);
                 Assert.IsTrue(result.resourceSets.Count > 0);
                 Assert.IsTrue(result.resourceSets[0].resources.Count > 0);
 
@@ -74,12 +74,12 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
                 dynamic proxy = new HttpClientProxy(client);
                 var result = await proxy.Locations("44.9108238220215,-93.1702041625977").get(includeEntityTypes: "Address,PopulatedPlace,Postcode1,AdminDivision1,CountryRegion", key: key);
 
-                Assert.AreEqual((int)result.statusCode, 200);
+                Assert.AreEqual(200, (int)result.statusCode);
                 Assert.IsTrue(result.resourceSets.Count > 0);
                 Assert.IsTrue(result.resourceSets[0].resources.Count > 0);
 
                 var address = result.resourceSets[0].resources[0].address.formattedAddress;
-                Assert.AreEqual((string)address, "1012 Davern St, St Paul, MN 55116");
+                Assert.AreEqual("1012 Davern St, St Paul, MN 55116", (string)address);
             }
         }
     }
