@@ -14,12 +14,13 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
     public class CancellationTests
     {
         [TestMethod]
+        [TestCategory("portable-client")]
+        [TestCategory("integration")]
         public void Cancel()
         {
-            dynamic client = new DynamicRestClient("http://dev.virtualearth.net/REST/v1/");
-
             string key = CredentialStore.RetrieveObject("bing.key.json").Key;
 
+            using (dynamic client = new DynamicRestClient("http://dev.virtualearth.net/REST/v1/"))
             using (var source = new CancellationTokenSource())
             {
                 // run request on a different thread and do not await thread
@@ -42,35 +43,39 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
         }
 
         [TestMethod]
+        [TestCategory("portable-client")]
+        [TestCategory("integration")]
         public void CancelPassesToConfigurationCallback()
         {
             using (var source = new CancellationTokenSource())
             {
                 // the cancellation token here is the one we passed in below
-                dynamic client = new DynamicRestClient("https://www.googleapis.com/oauth2/v1/userinfo", null, async (request, cancelToken) =>
+                using (dynamic client = new DynamicRestClient("https://www.googleapis.com/oauth2/v1/userinfo", null, 
+                    async (request, cancelToken) =>
+                    {
+                        Assert.AreEqual(source.Token, cancelToken);
+
+                        var oauth = new GoogleOAuth2("email profile");
+                        var authToken = await oauth.Authenticate("", cancelToken);
+                        request.Headers.Authorization = new AuthenticationHeaderValue("OAuth", authToken);
+                    }))
                 {
-                    Assert.AreEqual(source.Token, cancelToken);
+                    // run request on a different thread and do not await thread
+                    Task t = client.oauth2.v1.userinfo.get(source.Token);
 
-                    var oauth = new GoogleOAuth2("email profile");
-                    var authToken = await oauth.Authenticate("", cancelToken);
-                    request.Headers.Authorization = new AuthenticationHeaderValue("OAuth", authToken);
-                });
+                    // cancel on unit test thread
+                    source.Cancel();
 
-                // run request on a different thread and do not await thread
-                Task t = client.oauth2.v1.userinfo.get(source.Token);
-
-                // cancel on unit test thread
-                source.Cancel();
-
-                try
-                {
-                    // this will throw
-                    Task.WaitAll(t);
-                    Assert.Fail("Task was not cancelled");
-                }
-                catch (AggregateException e)
-                {
-                    Assert.IsTrue(e.InnerExceptions.OfType<TaskCanceledException>().Any());
+                    try
+                    {
+                        // this will throw
+                        Task.WaitAll(t);
+                        Assert.Fail("Task was not cancelled");
+                    }
+                    catch (AggregateException e)
+                    {
+                        Assert.IsTrue(e.InnerExceptions.OfType<TaskCanceledException>().Any());
+                    }
                 }
             }
         }

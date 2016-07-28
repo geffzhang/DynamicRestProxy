@@ -3,15 +3,10 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 
-namespace DynamicRestProxy.PortableHttpClient
+namespace DynamicRestProxy
 {
     static class Extensions
     {
-        public static T FirstOrDefault<T>(this IEnumerable<T> source, T def)
-        {
-            return source.Any() ? source.First() : def;
-        }
-
         public static string AsQueryString(this IEnumerable<KeyValuePair<string, object>> parameters, string prepend = "?")
         {
             if (!parameters.Any())

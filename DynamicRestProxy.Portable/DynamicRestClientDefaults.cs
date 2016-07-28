@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DynamicRestProxy.PortableHttpClient
 {
     /// <summary>
-    /// Default values that will be added all all requests
+    /// Default values that will be added to all requests
     /// </summary>
-    public class DynamicRestClientDefaults
+    public sealed class DynamicRestClientDefaults
     {
         /// <summary>
         /// ctor
@@ -13,11 +14,11 @@ namespace DynamicRestProxy.PortableHttpClient
         public DynamicRestClientDefaults()
         {
             DefaultParameters = new Dictionary<string, object>();
-            DefaultHeaders = new Dictionary<string, string>();
+            DefaultHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
-        /// Default paramter values
+        /// Default parameter values
         /// </summary>
         public IDictionary<string, object> DefaultParameters { get; private set; }
 

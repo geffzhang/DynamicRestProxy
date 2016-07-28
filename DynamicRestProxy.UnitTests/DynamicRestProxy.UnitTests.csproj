@@ -39,13 +39,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="RestSharp, Version=105.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RestSharp.105.0.1\lib\net4\RestSharp.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
@@ -62,9 +58,16 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="BinderExtensions.cs" />
+    <Compile Include="..\DynamicRestProxy.Portable\BinderExtensions.cs">
+      <Link>BinderExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\DynamicRestProxy.Portable\LinqExtensions.cs">
+      <Link>LinqExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\DynamicRestProxy.Portable\RestProxy.cs">
+      <Link>RestProxy.cs</Link>
+    </Compile>
     <Compile Include="ParameterPassingTests.cs" />
-    <Compile Include="RestProxy.cs" />
     <Compile Include="TestProxy.cs" />
     <Compile Include="UrlConstructionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

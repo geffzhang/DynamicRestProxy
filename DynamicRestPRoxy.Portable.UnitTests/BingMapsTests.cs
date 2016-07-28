@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Dynamic;
 using System.Threading.Tasks;
 using System.Net.Http;
-using System.Net;
-
-using DynamicRestProxy.PortableHttpClient;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -22,6 +18,7 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
     }
 
     [TestClass]
+    [DeploymentItem(@"MockResponses\")]
     public class BingMapsTests
     {
         [TestMethod]
@@ -29,28 +26,24 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
         [TestCategory("integration")]
         public async Task CoordinateFromPostalCode()
         {
-            var handler = new HttpClientHandler();
-            if (handler.SupportsAutomaticDecompression)
-            {
-                handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            }
-
-            using (var client = new HttpClient(handler, true))
+            using (var client = new HttpClient(MockInitialization.Handler, false))
             {
                 client.BaseAddress = new Uri("http://dev.virtualearth.net/REST/v1/");
 
                 string key = CredentialStore.RetrieveObject("bing.key.json").Key;
 
-                dynamic proxy = new HttpClientProxy(client);
-                var result = await proxy.Locations.get(postalCode: "55116", countryRegion: "US", key: key);
+                using (dynamic proxy = new DynamicRestClient(client))
+                {
+                    var result = await proxy.Locations.get(postalCode: "55116", countryRegion: "US", key: key);
 
-                Assert.AreEqual(200, (int)result.statusCode);
-                Assert.IsTrue(result.resourceSets.Count > 0);
-                Assert.IsTrue(result.resourceSets[0].resources.Count > 0);
+                    Assert.AreEqual(200, (int)result.statusCode);
+                    Assert.IsTrue(result.resourceSets.Count > 0);
+                    Assert.IsTrue(result.resourceSets[0].resources.Count > 0);
 
-                var r = result.resourceSets[0].resources[0].point.coordinates;
-                Assert.IsTrue((44.9108238220215).AboutEqual((double)r[0]));
-                Assert.IsTrue((-93.1702041625977).AboutEqual((double)r[1]));
+                    var r = result.resourceSets[0].resources[0].point.coordinates;
+                    Assert.IsTrue((44.9108238220215).AboutEqual((double)r[0]));
+                    Assert.IsTrue((-93.1702041625977).AboutEqual((double)r[1]));
+                }
             }
         }
 
@@ -59,27 +52,23 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
         [TestCategory("integration")]
         public async Task GetFormattedAddressFromCoordinate()
         {
-            var handler = new HttpClientHandler();
-            if (handler.SupportsAutomaticDecompression)
-            {
-                handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            }
-
-            using (var client = new HttpClient(handler, true))
+            using (var client = new HttpClient(MockInitialization.Handler, false))
             {
                 client.BaseAddress = new Uri("http://dev.virtualearth.net/REST/v1/");
 
                 string key = CredentialStore.RetrieveObject("bing.key.json").Key;
 
-                dynamic proxy = new HttpClientProxy(client);
-                var result = await proxy.Locations("44.9108238220215,-93.1702041625977").get(includeEntityTypes: "Address,PopulatedPlace,Postcode1,AdminDivision1,CountryRegion", key: key);
+                using (dynamic proxy = new DynamicRestClient(client))
+                {
+                    var result = await proxy.Locations("44.9108238220215,-93.1702041625977").get(includeEntityTypes: "Address,PopulatedPlace,Postcode1,AdminDivision1,CountryRegion", key: key);
 
-                Assert.AreEqual(200, (int)result.statusCode);
-                Assert.IsTrue(result.resourceSets.Count > 0);
-                Assert.IsTrue(result.resourceSets[0].resources.Count > 0);
+                    Assert.AreEqual(200, (int)result.statusCode);
+                    Assert.IsTrue(result.resourceSets.Count > 0);
+                    Assert.IsTrue(result.resourceSets[0].resources.Count > 0);
 
-                var address = result.resourceSets[0].resources[0].address.formattedAddress;
-                Assert.AreEqual("1012 Davern St, St Paul, MN 55116", (string)address);
+                    var address = result.resourceSets[0].resources[0].address.formattedAddress;
+                    Assert.AreEqual("1012 Davern St, St Paul, MN 55116", address);
+                }
             }
         }
     }

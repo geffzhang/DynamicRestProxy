@@ -14,41 +14,41 @@ using UnitTestHelpers;
 namespace DynamicRestProxy.PortableHttpClient.UnitTests
 {
     [TestClass]
+    [DeploymentItem(@"MockResponses\")]
     public class GoogleTests
     {
-        private static string _token = null;
+        private static string _token = null;        
 
         [TestMethod]
         [TestCategory("portable")]
         [TestCategory("integration")]
+        [TestCategory("google")]
         //  [Ignore] // - this test requires user interaction
         public async Task GetUserProfile()
         {
             var auth = new GoogleOAuth2("email profile");
             _token = await auth.Authenticate(_token);
             Assert.IsNotNull(_token, "auth failed");
-            var handler = new HttpClientHandler();
-            if (handler.SupportsAutomaticDecompression)
-            {
-                handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            }
 
-            using (var client = new HttpClient(handler, true))
+            using (var client = new HttpClient(MockInitialization.Handler, false))
             {
                 client.BaseAddress = new Uri("https://www.googleapis.com");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", _token);
 
-                dynamic proxy = new HttpClientProxy(client);
-                var profile = await proxy.oauth2.v1.userinfo.get();
+                using (dynamic proxy = new DynamicRestClient(client))
+                {
+                    var profile = await proxy.oauth2.v1.userinfo.get();
 
-                Assert.IsNotNull(profile);
-                Assert.AreEqual("Kackman", (string)profile.family_name);
+                    Assert.IsNotNull(profile);
+                    Assert.AreEqual("Kackman", profile.family_name);
+                }
             }
         }
 
         [TestMethod]
         [TestCategory("portable")]
         [TestCategory("integration")]
+        [TestCategory("google")]
         //  [Ignore] // - this test requires user interaction
         public async Task GetCalendarList()
         {
@@ -56,28 +56,25 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
             _token = await auth.Authenticate(_token);
             Assert.IsNotNull(_token, "auth failed");
 
-            var handler = new HttpClientHandler();
-            if (handler.SupportsAutomaticDecompression)
-            {
-                handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            }
-
-            using (var client = new HttpClient(handler, true))
+            using (var client = new HttpClient(MockInitialization.Handler, false))
             {
                 client.BaseAddress = new Uri("https://www.googleapis.com/calendar/v3/");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", _token);
 
-                dynamic proxy = new HttpClientProxy(client);
-                var list = await proxy.users.me.calendarList.get();
+                using (dynamic proxy = new DynamicRestClient(client))
+                {
+                    var list = await proxy.users.me.calendarList.get();
 
-                Assert.IsNotNull(list);
-                Assert.AreEqual("calendar#calendarList", (string)list.kind);
+                    Assert.IsNotNull(list);
+                    Assert.AreEqual("calendar#calendarList", list.kind);
+                }
             }
         }
 
         [TestMethod]
         [TestCategory("portable")]
         [TestCategory("ordered")]
+        [TestCategory("google")]
         // [Ignore] // - this test requires user interaction
         public async Task CreateCalendar()
         {
@@ -85,32 +82,28 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
             _token = await auth.Authenticate(_token);
             Assert.IsNotNull(_token, "auth failed");
 
-            var handler = new HttpClientHandler();
-            if (handler.SupportsAutomaticDecompression)
-            {
-                handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            }
-
-            using (var client = new HttpClient(handler, true))
+            using (var client = new HttpClient(MockInitialization.Handler, false))
             {
                 client.BaseAddress = new Uri("https://www.googleapis.com/calendar/v3/");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", _token);
 
-                dynamic proxy = new HttpClientProxy(client);
+                using (dynamic proxy = new DynamicRestClient(client))
+                {
+                    dynamic calendar = new ExpandoObject();
+                    calendar.summary = "unit_testing";
 
-                dynamic calendar = new ExpandoObject();
-                calendar.summary = "unit_testing";
+                    var list = await proxy.calendars.post(calendar);
 
-                var list = await proxy.calendars.post(calendar);
-
-                Assert.IsNotNull(list);
-                Assert.AreEqual("unit_testing", (string)list.summary);
+                    Assert.IsNotNull(list);
+                    Assert.AreEqual("unit_testing", list.summary);
+                }
             }
         }
 
         [TestMethod]
         [TestCategory("portable")]
         [TestCategory("ordered")]
+        [TestCategory("google")]
         //  [Ignore] // - this test requires user interaction
         public async Task UpdateCalendar()
         {
@@ -118,42 +111,40 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
             _token = await auth.Authenticate(_token);
             Assert.IsNotNull(_token, "auth failed");
 
-            var handler = new HttpClientHandler();
-            if (handler.SupportsAutomaticDecompression)
-            {
-                handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            }
-
-            using (var client = new HttpClient(handler, true))
+            using (var client = new HttpClient(MockInitialization.Handler, false))
             {
                 client.BaseAddress = new Uri("https://www.googleapis.com/calendar/v3/");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", _token);
-                dynamic proxy = new HttpClientProxy(client);
-                var list = await proxy.users.me.calendarList.get();
-                Assert.IsNotNull(list);
 
-                string id = ((IEnumerable<dynamic>)(list.items)).Where(cal => cal.summary == "unit_testing").Select(cal => (string)cal.id).FirstOrDefault();
-                Assert.IsFalse(string.IsNullOrEmpty(id));
+                using (dynamic proxy = new DynamicRestClient(client))
+                {
+                    var list = await proxy.users.me.calendarList.get();
+                    Assert.IsNotNull(list);
 
-                var guid = Guid.NewGuid().ToString();
-                dynamic calendar = new ExpandoObject();
-                calendar.summary = "unit_testing";
-                calendar.description = guid;
+                    string id = ((IEnumerable<dynamic>)(list.items)).Where(cal => cal.summary == "unit_testing").Select(cal => cal.id).FirstOrDefault();
+                    Assert.IsFalse(string.IsNullOrEmpty(id));
 
-                var result = await proxy.calendars(id).put(calendar);
-                Assert.IsNotNull(result);
+                    var guid = Guid.NewGuid().ToString();
+                    dynamic calendar = new ExpandoObject();
+                    calendar.summary = "unit_testing";
+                    calendar.description = guid;
 
-                list = await proxy.users.me.calendarList.get();
-                Assert.IsNotNull(list);
-                string description = ((IEnumerable<dynamic>)(list.items)).Where(cal => cal.summary == "unit_testing").Select(cal => (string)cal.description).FirstOrDefault();
+                    var result = await proxy.calendars(id).put(calendar);
+                    Assert.IsNotNull(result);
 
-                Assert.AreEqual(guid, description);
+                    list = await proxy.users.me.calendarList.get();
+                    Assert.IsNotNull(list);
+                    string description = ((IEnumerable<dynamic>)(list.items)).Where(cal => cal.summary == "unit_testing").Select(cal => cal.description).FirstOrDefault();
+
+                    Assert.AreEqual(guid, description);
+                }
             }
         }
 
         [TestMethod]
         [TestCategory("portable")]
         [TestCategory("ordered")]
+        [TestCategory("google")]
         //  [Ignore] // - this test requires user interaction
         public async Task DeleteCalendar()
         {
@@ -161,32 +152,28 @@ namespace DynamicRestProxy.PortableHttpClient.UnitTests
             _token = await auth.Authenticate(_token);
             Assert.IsNotNull(_token, "auth failed");
 
-            var handler = new HttpClientHandler();
-            if (handler.SupportsAutomaticDecompression)
-            {
-                handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            }
-
-            using (var client = new HttpClient(handler, true))
+            using (var client = new HttpClient(MockInitialization.Handler, false))
             {
                 client.BaseAddress = new Uri("https://www.googleapis.com/calendar/v3/");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", _token);
 
-                dynamic proxy = new HttpClientProxy(client);
-                var list = await proxy.users.me.calendarList.get();
-                Assert.IsNotNull(list);
+                using (dynamic proxy = new DynamicRestClient(client))
+                {
+                    var list = await proxy.users.me.calendarList.get();
+                    Assert.IsNotNull(list);
 
-                string id = ((IEnumerable<dynamic>)(list.items)).Where(cal => cal.summary == "unit_testing").Select(cal => (string)cal.id).FirstOrDefault();
-                Assert.IsFalse(string.IsNullOrEmpty(id), "calendar does not exist so we can't delete it");
+                    string id = ((IEnumerable<dynamic>)(list.items)).Where(cal => cal.summary == "unit_testing").Select(cal => cal.id).FirstOrDefault();
+                    Assert.IsFalse(string.IsNullOrEmpty(id), "calendar does not exist so we can't delete it");
 
-                var result = await proxy.calendars(id).delete();
-                Assert.IsNull(result);
+                    var result = await proxy.calendars(id).delete();
+                    Assert.IsNull(result);
 
-                //var list2 = await proxy.users.me.calendarList.get();
-                //Assert.IsNotNull(list2);
-                //var id2 = ((IEnumerable<dynamic>)(list2.items)).Where(cal => cal.summary == "unit_testing").Select(cal => (string)cal.id).FirstOrDefault();
+                    //var list2 = await proxy.users.me.calendarList.get();
+                    //Assert.IsNotNull(list2);
+                    //var id2 = ((IEnumerable<dynamic>)(list2.items)).Where(cal => cal.summary == "unit_testing").Select(cal => (string)cal.id).FirstOrDefault();
 
-                //Assert.IsTrue(string.IsNullOrEmpty(id2), "calendar seems to have not been deleted");
+                    //Assert.IsTrue(string.IsNullOrEmpty(id2), "calendar seems to have not been deleted");
+                }
             }
         }
     }
