@@ -1,0 +1,237 @@
+{
+  "homepages": [],
+  "source_base_path": "C:/Users/Erffice/Documents/GitHub/DynamicRestProxy/src/docfx",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/DynamicRestProxy.PortableHttpClient.ContentInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/DynamicRestProxy.PortableHttpClient.ContentInfo.html",
+          "hash": "YeEf2WHIjidoxfruZ8VqgA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/DynamicRestProxy.PortableHttpClient.DynamicRestClient.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/DynamicRestProxy.PortableHttpClient.DynamicRestClient.html",
+          "hash": "24TuopLHS72XHhWgjOaCtw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/DynamicRestProxy.PortableHttpClient.DynamicRestClientDefaults.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/DynamicRestProxy.PortableHttpClient.DynamicRestClientDefaults.html",
+          "hash": "+EIuV25Ce51Ry5AoOhi26w=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/DynamicRestProxy.PortableHttpClient.DynamicRestClientResponseException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/DynamicRestProxy.PortableHttpClient.DynamicRestClientResponseException.html",
+          "hash": "y28pmWCSjAIPbZ5aCWRuSg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/DynamicRestProxy.PortableHttpClient.HttpClientExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/DynamicRestProxy.PortableHttpClient.HttpClientExtensions.html",
+          "hash": "GP66qCqs0CSZ3nJQYOq4+g=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/DynamicRestProxy.PortableHttpClient.PostUrlParam.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/DynamicRestProxy.PortableHttpClient.PostUrlParam.html",
+          "hash": "DidoYQ3T4ETEsbk19D02Rw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/DynamicRestProxy.PortableHttpClient.StreamInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/DynamicRestProxy.PortableHttpClient.StreamInfo.html",
+          "hash": "czayWPFi7lJoTT8mKFQOWg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/DynamicRestProxy.PortableHttpClient.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/DynamicRestProxy.PortableHttpClient.html",
+          "hash": "upuFyNCKu2VhS3xm+uyrZg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/DynamicRestProxy.RestProxy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/DynamicRestProxy.RestProxy.html",
+          "hash": "yZt0ZRazQJ04NAhvs/W1dA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/DynamicRestProxy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/DynamicRestProxy.html",
+          "hash": "4WB1Rj7NEYWyWA+hv6tUOQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "api/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "api/index.html",
+          "hash": "pPQIMWz/pxt7cBo6BdrlAw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html",
+          "hash": "QOB6UMSdIdKmn9p9qHqtlQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/advanced.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/advanced.html",
+          "hash": "Ymq4CmdoyVFd2WUSjxWgGw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/getting-started.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/getting-started.html",
+          "hash": "sWa49Pm30Xl9mx3lYo5dxg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "QMF399QHYlc+vgnEoywlMQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html",
+          "hash": "TTd4yMPxIy8dNqgnPSTqbg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot build incrementally because last build info is missing.",
+        "incrementalPhase": "build"
+      },
+      "processors": {
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot suppport incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build"
+        },
+        "ConceptualDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build"
+        },
+        "ManagedReferenceDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build"
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot support incremental post processing, the reason is: last post processor info is null.",
+        "incrementalPhase": "postProcessing"
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

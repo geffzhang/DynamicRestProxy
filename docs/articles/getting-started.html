@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>DynamicRest - Getting Started </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="DynamicRest - Getting Started ">
+    <meta name="generator" content="docfx 2.28.3.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="../toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="dynamicrest---getting-started">DynamicRest - Getting Started</h1>
+
+<p>This article describes the basic conventions of the DynamicRest api.
+See <a href="advanced.html">advanced topics</a> for mechanisms to bypass these conventions.</p>
+<h2 id="conventions">Conventions</h2>
+<ol>
+<li>There are five Http verbs: <code>get</code>, <code>put</code>, <code>post</code>, <code>patch</code> and <code>delete</code>, which are invoked as a normal method call</li>
+<li>Http verb invocations are always <code>async</code> and return a <code>Task&lt;T&gt;</code>, where <code>T</code> is a dynamic object</li>
+<li>Named arguments passed to a verb invocation are Uri parameters</li>
+<li>Unnamed arguments passed to a verb invocation are request content </li>
+<li>Data Transfer Objects are serialized as JSON in both requests and responses</li>
+<li>Http status codes that do not indicate success throw a <code>DynamicRestClientException</code></li>
+</ol>
+<h2 id="basic-usage">Basic Usage</h2>
+<p>Using the dynamic rest client starts with instantiating an instance, accessing an endpoint path, invoking a REST verb, and <code>await</code>ing the result. Always declare the <code>DynamicRestClient</code> as
+a <code>dynamic</code>.</p>
+<pre><code>dynamic client = new DynamicRestClient(&quot;http://dev.virtualearth.net/REST/v1/&quot;);
+dynamic result = await proxy.Locations.get(postalCode: &quot;55116&quot;, countryRegion: &quot;US&quot;, key: &quot;api-key&quot;);
+</code></pre><p>[Figure 1]</p>
+<pre><code>GET http://dev.virtualearth.net/REST/v1/Locations?postalCode=55116&amp;countryRegion=US&amp;key=api-key HTTP/1.1
+Accept: application/json, text/json, text/x-json, text/javascript
+Host: dev.virtualearth.net
+Accept-Encoding: gzip, deflate
+Connection: Keep-Alive
+</code></pre><h3 id="building-the-endpoint-path">Building the endpoint path</h3>
+<p>The endpoint path is represented by dot-separated members of the dynamic client instance. Each node in the path is another dynamic object
+to which additional path elements can be chained. The resulting path is relative to the base address set in the constructor of the client object.</p>
+<p>The full endpoint Uri of the example in Figure 1 is:</p>
+<p><a href="http://dev.virtualearth.net/REST/v1/Locations/">http://dev.virtualearth.net/REST/v1/Locations/</a></p>
+<pre><code>dynamic google = new DynamicRestClient(&quot;https://www.googleapis.com/&quot;);
+dynamic bucket = await google.storage.v1.b(&quot;uspto-pair&quot;).get();
+</code></pre><p>[Figure 2]</p>
+<p>The code in Figure 2 chains multiple elements together to build a longer path. It also uses an escape mechanism in order to specify a
+path element that is not a valid idenifier in C#. The resulting Uri is:</p>
+<p><a href="https://www.googleapis.com/storage/v1/b/uspto-pair/">https://www.googleapis.com/storage/v1/b/uspto-pair/</a></p>
+<p>note: Uri path segments are <code>UrlEncoded</code> internally, so there is no need to escape them.</p>
+<h3 id="passing-parameters">Passing parameters</h3>
+<p>Parameters are passed to the verb&#39;s invocation using <a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments#named-arguments">C#&#39;s named parameter syntax</a>.</p>
+<p>Any type of object can be passed as a parameter and will be serialized via the value object&#39;s
+<a href="https://docs.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.7">ToString</a>
+method. Both parameter names and values are <a href="https://docs.microsoft.com/en-us/dotnet/api/system.net.webutility.urlencode?view=netframework-4.7">Url encoded</a></p>
+<p>The GET request for the example in Figure 1 is:
+<a href="http://dev.virtualearth.net/REST/v1/Locations/?postalCode=55116&amp;countryRegion=US&amp;key=api-key">http://dev.virtualearth.net/REST/v1/Locations/?postalCode=55116&countryRegion=US&key=api-key</a></p>
+<p>Named parameters passed to a POST invocation will be <a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.1">form url encoded</a> in the request body.</p>
+<p>note: Both parameter names and values are <code>UrlEncoded</code> internally, so there is no need to escape them.</p>
+<h3 id="passing-content">Passing content</h3>
+<p>Request content is passed to the verb invocation as an unnamed argument. The first unnamed argument will be passed as the request
+content body. Subsequent unnamed arguments, <a href="advanced.html">with the exception of some special types</a>, will be ignored.</p>
+<ul>
+<li>Strings and primitive types will be passed as <a href="https://docs.microsoft.com/en-us/dotnet/api/system.net.http.stringcontent.-ctor?view=netframework-4.7">StringContent</a></li>
+<li>Byte arrays will be passed as <a href="https://docs.microsoft.com/en-us/dotnet/api/system.net.http.bytearraycontent?view=netframework-4.7">ByteArrayContent</a></li>
+<li>Any type of <a href="http://msdn.microsoft.com/query/dev15.query?appId=Dev15IDEF1&amp;l=EN-US&amp;k=k(System.IO.Stream);k(DevLang-csharp)&amp;rd=true">stream</a> will be passed as <a href="https://docs.microsoft.com/en-us/dotnet/api/system.net.http.streamcontent.-ctor?view=netframework-4.7">StreamContent</a></li>
+<li>A <code>IEnumerable&lt;object&gt;</code> will be sent as multi-part content, with each constituent object being serialized by the above rules</li>
+<li>All other types will be serialized to JSON</li>
+</ul>
+<p>For example:</p>
+<pre><code>dynamic google = new DynamicRestClient(&quot;https://www.googleapis.com/calendar/v3/&quot;);
+
+dynamic calendar = new ExpandoObject();
+calendar.summary = &quot;unit_testing&quot;;
+
+var result = await google.calendars.post(calendar);
+</code></pre><p>[Figure 3]</p>
+<p>The resulting request shows the serialized content:</p>
+<pre><code>POST https://www.googleapis.com/calendar/v3/calendars HTTP/1.1
+Authorization: OAuth xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Accept: application/json, text/json, text/x-json, text/javascript
+Content-Type: application/json; charset=utf-8
+Host: www.googleapis.com
+Expect: 100-continue
+Accept-Encoding: gzip, deflate
+Connection: Keep-Alive
+Content-Length: 26
+
+{&quot;summary&quot;:&quot;unit_testing&quot;}
+</code></pre><h3 id="invoking-the-http-verb">Invoking the Http verb</h3>
+<p><code>get</code>, <code>put</code>, <code>post</code>, <code>patch</code> and <code>delete</code> are the http verbs supported by this REST client. Invocation of the verb method
+sends the appropriate http message to the endpoint, along with defaults, parameters and content. Verb methods are always
+lower case and return a <code>Task</code> object, so must be <code>await</code>-ed. Unless using a strongly typed response
+(see <a href="advanced.html">Advanced Topics</a>), the return will be <code>Task&lt;object&gt;</code> where the result type is a dynamic object.</p>
+<h2 id="setting-defaults">Setting Defaults</h2>
+<p>Setting defaults to be included in every request is accomplished by passing a 
+<a class="xref" href="../api/DynamicRestProxy.PortableHttpClient.DynamicRestClientDefaults.html">DynamicRestClientDefaults</a> to the client constructor.</p>
+<h3 id="api-keys">Api keys</h3>
+<p>Many REST apis require an api-key, often as a parameter included on all requests. Setting it as a default parameter
+will ensure it is added to every request.</p>
+<pre><code>var defaults = new DynamicRestClientDefaults();
+defaults.DefaultParameters.Add(&quot;format&quot;, &quot;json&quot;);
+defaults.DefaultParameters.Add(&quot;api_key&quot;, &quot;my-api-key&quot;);
+defaults.DefaultParameters.Add(&quot;nojsoncallback&quot;, &quot;1&quot;);
+
+dynamic flickr = new DynamicRestClient(&quot;https://api.flickr.com/services/rest/&quot;);
+dynamic user = await flickr.get(method: &quot;flickr.people.findByUsername&quot;, username: &quot;dkackman&quot;);
+</code></pre><h3 id="authentication-and-authorization">Authentication and authorization</h3>
+<p>For services that require authentication and authorization, the <code>DynamicRestClientDefaults</code> type can also be used to 
+pass auth data.</p>
+<pre><code>var defaults = new DynamicRestClientDefaults()
+{
+    AuthScheme = &quot;OAuth&quot;,
+    AuthToken = &quot;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&quot;
+};
+
+dynamic google = new DynamicRestClient(&quot;https://www.googleapis.com/&quot;, defaults);
+dynamic profile = await google.oauth2.v1.userinfo.get();
+</code></pre><p>The auth data is added to every request.    </p>
+<pre><code>GET https://www.googleapis.com/oauth2/v1/userinfo HTTP/1.1
+Authorization: OAuth xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Accept: application/json, text/json, text/x-json, text/javascript
+Host: www.googleapis.com
+Accept-Encoding: gzip, deflate
+</code></pre><h2 id="http-errors">Http Errors</h2>
+<p>In the event that the response message&#39;s <a class="xref" href="https://msdn.microsoft.com/en-us/library/system.net.http.httpresponsemessage(v=vs.110).aspx">IsSuccessStatusCode</a> property
+is <code>false</code>, the invocation method will throw a 
+<a class="xref" href="../api/DynamicRestProxy.PortableHttpClient.DynamicRestClientResponseException.html">DynamicRestClientResponseException</a>.
+This exception includes the response message so that additional details of the falure can be inspected.</p>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/dkackman/DynamicRestProxy/blob/master/src/docfx/articles/getting-started.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+              <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Copyright © 2015-2017 Microsoft<br>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
